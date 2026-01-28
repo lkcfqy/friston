@@ -3,7 +3,7 @@ import os
 import time
 import tarfile
 import io
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 
 class DockerSandbox:
     """
@@ -38,6 +38,16 @@ class DockerSandbox:
             
             # Create workspace dir if not strictly standard (though work_dir usually auto-created)
             self.exec_run(f"mkdir -p {self.work_dir}")
+            
+            # [V2 Upgrade] Install LSP tools (Ruff, Mypy)
+            # In a production agent, we would build a custom Dockerfile.
+            # For prototype, we install at runtime (adds ~5-10s startup time).
+            print("🛠️ Installing LSP tools (ruff, mypy) in sandbox...")
+            exit_code, _, stderr = self.exec_run("pip install ruff mypy", timeout=120)
+            if exit_code != 0:
+                print(f"⚠️ Failed to install LSP tools: {stderr}")
+            else:
+                print("✅ LSP tools installed.")
             
         except Exception as e:
             raise RuntimeError(f"Failed to start sandbox: {e}")
@@ -109,6 +119,26 @@ class DockerSandbox:
             
         except Exception as e:
             return -1, "", str(e)
+
+    def lint_file(self, filename: str) -> Dict[str, str]:
+        """
+        Run static analysis (Ruff, Mypy) on a file.
+        Returns raw output for parsing.
+        """
+        if not self.container:
+            return {"ruff": "", "mypy": ""}
+            
+        # Ruff: Output JSON
+        rc_r, stdout_r, _ = self.exec_run(f"ruff check {filename} --format=json")
+        
+        # Mypy: Standard output (easier to parse for now than json flag which changes often)
+        # Using --no-error-summary to keep it clean
+        rc_m, stdout_m, _ = self.exec_run(f"mypy {filename} --no-error-summary --show-error-codes")
+
+        return {
+            "ruff": stdout_r,
+            "mypy": stdout_m
+        }
 
     def __enter__(self):
         self.start()

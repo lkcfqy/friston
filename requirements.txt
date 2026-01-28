@@ -13,4 +13,10 @@ tree-sitter-python<0.22
 docker
 requests
 pytest
+pytest
 pytest-asyncio
+
+# v2 Evolution (Memory & LSP)
+chromadb
+ruff
+mypy

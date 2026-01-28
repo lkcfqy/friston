@@ -3,9 +3,9 @@ import requests
 import json
 from typing import Optional
 
-class DeepSeekClient:
+class QwenClient:
     """
-    Client for interacting with DeepSeek (or compatible Local LLM).
+    Client for interacting with Qwen (or compatible Local LLM).
     Supports OpenAI-compatible API endpoints (e.g., Ollama, vLLM).
     """
     def __init__(self, base_url: str = "http://localhost:11434/v1", model: str = "qwen3:8b"):

@@ -136,3 +136,10 @@ dmypy.json
 # editors
 .vscode/
 .idea/
+
+# Project Friston Specific
+friston_memory/
+memory_db/
+demo_v2_workspace/
+test_workspace/
+chroma.sqlite3
